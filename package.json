@@ -1,5 +1,5 @@
 {
-	"name": "iris-auth",
+	"name": "iris-auth-util",
 	"version": "1.0.0",
 	"description": "IRIS auth util",
 	"main": "index.js",

@@ -219,4 +219,25 @@ describe("Auth", () => {
 				});
 		});
 	});
+	describe("create system session", () => {
+		it('should create an eternal session', (done) => {
+			auth.authorize({
+					user: "webwidget",
+					password_hash: "123456",
+					address: "",
+					expiry: false
+				})
+				.then((res) => {
+					// console.log(res);
+					expect(res).to.have.property("value").which.is.true;
+					expect(res).to.have.property("token").which.is.not.undefined;
+					expect(res).to.have.property("cas").which.is.not.undefined;
+					token = res.token;
+					done();
+				})
+				.catch((err) => {
+					done(err);
+				});
+		});
+	});
 });

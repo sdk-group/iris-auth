@@ -64,7 +64,8 @@ class Gandalf {
 	static authorize({
 		user: user,
 		password_hash: password_hash,
-		origin: origin
+		origin: origin,
+		expiry: exp
 	}) {
 		let get_user = null;
 		if(name_cache[user])
@@ -95,12 +96,16 @@ class Gandalf {
 					return Promise.reject(new Error("Incorrect password."));
 				}
 				let type = prop_mapping.types[usr["@type"][0]] || 'none';
+				let jwt_opts = {};
+				if(!(exp === false)) {
+					jwt_opts = {
+						expiresIn: exp || (default_expiration * 2)
+					};
+				}
 				let token = jwt.sign({
 					user: user,
 					origin: origin
-				}, jwt_secret, {
-					expiresIn: default_expiration * 2
-				});
+				}, jwt_secret, jwt_opts);
 
 				let data = {
 					login: user,
@@ -111,9 +116,13 @@ class Gandalf {
 					p_hash: password_hash,
 					token: token
 				};
-				return db_auth.upsert(`session::${user}::${origin}`, data, {
-						"expiry": default_expiration
-					})
+				let db_opts = {};
+				if(!(exp === false)) {
+					db_opts = {
+						"expiry": exp || default_expiration
+					};
+				}
+				return db_auth.upsert(`session::${user}::${origin}`, data, db_opts)
 					.then((res) => {
 						return {
 							value: true,

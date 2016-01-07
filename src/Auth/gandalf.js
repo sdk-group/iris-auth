@@ -127,6 +127,7 @@ class Gandalf {
 						return {
 							value: true,
 							token: token,
+							data: data,
 							cas: res.cas
 						};
 					});

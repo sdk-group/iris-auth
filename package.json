@@ -4,7 +4,7 @@
 	"description": "IRIS auth util",
 	"main": "index.js",
 	"scripts": {
-		"test": "mocha",
+		"test": "mocha ./build/**/*.test.js -r ./build/index.js",
 		"install": "gulp --gulpfile build.js"
 	},
 	"repository": {
@@ -15,6 +15,10 @@
 		"IRIS",
 		"auth"
 	],
+	"babel": {
+		"presets": ["node5"],
+		"babelrc": false
+	},
 	"author": "V.",
 	"license": "ISC",
 	"bugs": {
@@ -27,6 +31,7 @@
 		"lodash": "^4.0.0"
 	},
 	"devDependencies": {
+		"babel-preset-node5": "^10.3.0",
 		"Couchbird": "git+https://github.com/YuuKohaku/Couchbird.git",
 		"cbird-rdf": "git+https://github.com/YuuKohaku/cbird-rdf.git",
 		"chai": "^3.3.0",

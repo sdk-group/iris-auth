@@ -6,7 +6,7 @@ let N1qlQuery = require("Couchbird").N1qlQuery;
 
 let db_main = null;
 let db_auth = null;
-let default_expiration = 300;
+let default_expiration = false;
 let jwt_secret = '667';
 let name_cache = {};
 let prop_mapping = {
@@ -65,8 +65,9 @@ class Gandalf {
 		user: user,
 		password_hash: password_hash,
 		origin: origin,
-		expiry: exp
+		expiry: expiry
 	}) {
+		let exp = expiry || default_expiration;
 		let get_user = null;
 		if(name_cache[user])
 			get_user = db_main.get(name_cache[user]);
@@ -99,7 +100,7 @@ class Gandalf {
 				let jwt_opts = {};
 				if(!(exp === false)) {
 					jwt_opts = {
-						expiresIn: exp || (default_expiration * 2)
+						expiresIn: exp * 2
 					};
 				}
 				let token = jwt.sign({
@@ -119,7 +120,7 @@ class Gandalf {
 				let db_opts = {};
 				if(!(exp === false)) {
 					db_opts = {
-						"expiry": exp || default_expiration
+						"expiry": exp
 					};
 				}
 				return db_auth.upsert(`session::${user}::${origin}`, data, db_opts)
@@ -140,8 +141,10 @@ class Gandalf {
 			});
 	}
 	static update({
-		token: token
+		token: token,
+		expiry: expiry
 	}) {
+		let exp = expiry || default_expiration;
 		let to_sign = {};
 		let data = null;
 		return Promise.promisify(jwt.verify)(token, jwt_secret)
@@ -158,12 +161,20 @@ class Gandalf {
 				}
 				data = res.value;
 				data.last_seen = Date.now();
-				data.token = jwt.sign(to_sign, jwt_secret, {
-					expiresIn: default_expiration * 2
-				});
-				return db_auth.upsert(`session::${to_sign.user}::${to_sign.origin}`, data, {
-					"expiry": default_expiration
-				});
+				let jwt_opts = {};
+				if(!(exp === false)) {
+					jwt_opts = {
+						expiresIn: exp * 2
+					};
+				}
+				data.token = jwt.sign(to_sign, jwt_secret, jwt_opts);
+				let db_opts = {};
+				if(!(exp === false)) {
+					db_opts = {
+						"expiry": exp
+					};
+				}
+				return db_auth.upsert(`session::${to_sign.user}::${to_sign.origin}`, data, db_opts);
 			})
 			.then((res) => {
 				return {

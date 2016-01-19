@@ -13,9 +13,8 @@ let prop_mapping = {
 	login: "iris://vocabulary/domain#login",
 	password: "iris://vocabulary/domain#password",
 	types: {
-		'iris://vocabulary/domain#Employee': 'user',
-		'iris://vocabulary/domain#AWP': 'device',
-		'iris://vocabulary/domain#Terminal': 'device'
+		'iris://vocabulary/domain#Employee': 'Employee',
+		'iris://vocabulary/domain#SystemEntity': 'SystemEntity'
 	}
 };
 
@@ -26,9 +25,11 @@ class Gandalf {
 	static configure({
 		data: b_main,
 		session: b_auth,
-		expiry: dexp
+		expiry: dexp,
+		property_mapping: props
 	}) {
 		if(dexp) default_expiration = dexp;
+		if(_.isPlainObject(props)) prop_mapping = _.merge(prop_mapping, props);
 		db_main = couchbird.bucket(b_main);
 		db_auth = couchbird.bucket(b_auth);
 	}
@@ -114,6 +115,7 @@ class Gandalf {
 					last_seen: Date.now(),
 					origin: origin,
 					user_id: usr["@id"],
+					user_type: type,
 					p_hash: password_hash,
 					token: token
 				};

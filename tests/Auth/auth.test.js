@@ -18,7 +18,7 @@ let cfg = {
 		"fs": false
 	}
 };
-
+console.log(require("cbird-rdf"));
 auth.configure({
 	data: cfg.buckets.main,
 	session: cfg.buckets.auth

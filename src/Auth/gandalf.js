@@ -42,7 +42,7 @@ class Gandalf {
 				return db_auth.get(`session::${decoded.user}::${decoded.origin}`);
 			})
 			.then((res) => {
-				if(res.value && _.eq(token, res.value.token)) {
+				if(res.value && _.isEqual(token, res.value.token)) {
 					return {
 						value: true,
 						data: res.value
@@ -81,7 +81,7 @@ class Gandalf {
 					_.map(res, (val) => {
 						let value = val.doc;
 						name_cache[value[prop_mapping.login][0]["@value"]] = value['@id'];
-						if(_.eq(value[prop_mapping.login][0]["@value"], user))
+						if(_.isEqual(value[prop_mapping.login][0]["@value"], user))
 							needle = value;
 					});
 					return needle;
@@ -94,7 +94,7 @@ class Gandalf {
 					return Promise.reject(new Error("No such user."));
 				}
 				let usr = res.cas ? res.value : res;
-				if(!_.eq(usr[prop_mapping.password][0]["@value"], password_hash)) {
+				if(!_.isEqual(usr[prop_mapping.password][0]["@value"], password_hash)) {
 					return Promise.reject(new Error("Incorrect password."));
 				}
 				let type = prop_mapping.types[usr["@type"][0]] || 'none';
@@ -158,7 +158,7 @@ class Gandalf {
 				return db_auth.get(`session::${decoded.user}::${decoded.origin}`);
 			})
 			.then((res) => {
-				if(!_.eq(token, res.value.token)) {
+				if(!_.isEqual(token, res.value.token)) {
 					Promise.reject(new Error('Invalid token.'));
 				}
 				data = res.value;

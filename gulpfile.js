@@ -48,6 +48,15 @@ gulp.task('test', ['start-test'], function() {
 	gulp.watch(["src/**/*.js", "tests/**/*.js"], ['es6']);
 });
 
+gulp.task('upd', ['es6'], function() {
+	return gulp.src(["build/**/*.js"])
+		.pipe(gulp.dest("../iris-v2/node_modules/iris-auth-util/build"));
+});
+
+gulp.task('test-upd', ['start-test'], function() {
+	gulp.watch(["src/**/*.js", "tests/**/*.js"], ['upd']);
+});
+
 gulp.task('test-jenkins', ['es6'], function() {
 	return gulp.src(["build/**/*.js"])
 		.pipe(mocha({

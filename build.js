@@ -5,7 +5,12 @@ let babel = require("gulp-babel");
 
 gulp.task("es6-js", function() {
 	return gulp.src(["src/**/*.js", "tests/**/*.js"])
-		.pipe(babel())
+		.pipe(babel({
+			"presets": [
+				"es2015-node5"
+			],
+			"babelrc": false
+		}))
 		.pipe(gulp.dest("build"))
 		.on('end', function() {
 			console.log('end build');

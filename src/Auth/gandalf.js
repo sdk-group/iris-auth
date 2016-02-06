@@ -10,12 +10,8 @@ let default_expiration = false;
 let jwt_secret = '667';
 let name_cache = {};
 let prop_mapping = {
-	login: "iris://vocabulary/domain#login",
-	password: "iris://vocabulary/domain#password",
-	types: {
-		'iris://vocabulary/domain#Employee': 'Employee',
-		'iris://vocabulary/domain#SystemEntity': 'SystemEntity'
-	}
+	login: "login",
+	password: "password_hash"
 };
 
 class Gandalf {
@@ -80,8 +76,8 @@ class Gandalf {
 					let needle = false;
 					_.map(res, (val) => {
 						let value = val.doc;
-						name_cache[value[prop_mapping.login][0]["@value"]] = value['@id'];
-						if(_.isEqual(value[prop_mapping.login][0]["@value"], user))
+						name_cache[value[prop_mapping.login][0]] = value['@id'];
+						if(_.isEqual(value[prop_mapping.login][0], user))
 							needle = value;
 					});
 					return needle;
@@ -94,10 +90,10 @@ class Gandalf {
 					return Promise.reject(new Error("No such user."));
 				}
 				let usr = res.cas ? res.value : res;
-				if(!_.isEqual(usr[prop_mapping.password][0]["@value"], password_hash)) {
+				if(!_.isEqual(usr[prop_mapping.password][0], password_hash)) {
 					return Promise.reject(new Error("Incorrect password."));
 				}
-				let type = prop_mapping.types[usr["@type"][0]] || 'none';
+				let type = usr["@type"] || 'none';
 				let jwt_opts = {};
 				if(!(exp === false)) {
 					jwt_opts = {

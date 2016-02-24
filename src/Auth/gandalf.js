@@ -2,7 +2,8 @@
 
 let jwt = require("jsonwebtoken");
 let couchbird = require("Couchbird")();
-let N1qlQuery = require("Couchbird").N1qlQuery;
+let N1qlQuery = require("Couchbird")
+	.N1qlQuery;
 
 let db_main = null;
 let db_auth = null;
@@ -24,8 +25,8 @@ class Gandalf {
 		expiry: dexp,
 		property_mapping: props
 	}) {
-		if(dexp) default_expiration = dexp;
-		if(_.isPlainObject(props)) prop_mapping = _.merge(prop_mapping, props);
+		if (dexp) default_expiration = dexp;
+		if (_.isPlainObject(props)) prop_mapping = _.merge(prop_mapping, props);
 		db_main = couchbird.bucket(b_main);
 		db_auth = couchbird.bucket(b_auth);
 	}
@@ -38,7 +39,7 @@ class Gandalf {
 				return db_auth.get(`session::${decoded.user}::${decoded.origin}`);
 			})
 			.then((res) => {
-				if(res.value && _.isEqual(token, res.value.token)) {
+				if (res.value && _.isEqual(token, res.value.token)) {
 					return {
 						value: true,
 						data: res.value
@@ -66,18 +67,18 @@ class Gandalf {
 	}) {
 		let exp = expiry || default_expiration;
 		let get_user = null;
-		if(name_cache[user])
+		if (name_cache[user])
 			get_user = db_main.get(name_cache[user]);
 		else {
-			let qstr = "SELECT * FROM `" + db_main.bucket_name + "` AS doc WHERE '" + prop_mapping.login + "' IN object_names(doc) ;";
+			let qstr = "SELECT * FROM `" + db_main.bucket_name + "` AS doc WHERE doc.`" + prop_mapping.login + "` IS NOT MISSING;";
 			let query = N1qlQuery.fromString(qstr);
 			get_user = db_main.N1QL(query)
 				.then((res) => {
 					let needle = false;
 					_.map(res, (val) => {
 						let value = val.doc;
-						name_cache[value[prop_mapping.login][0]] = value['@id'];
-						if(_.isEqual(value[prop_mapping.login][0], user))
+						name_cache[value[prop_mapping.login]] = value['@id'];
+						if (_.isEqual(value[prop_mapping.login], user))
 							needle = value;
 					});
 					return needle;
@@ -86,16 +87,16 @@ class Gandalf {
 
 		return get_user
 			.then((res) => {
-				if(!res) {
+				if (!res) {
 					return Promise.reject(new Error("No such user."));
 				}
 				let usr = res.cas ? res.value : res;
-				if(!_.isEqual(usr[prop_mapping.password][0], password_hash)) {
+				if (!_.isEqual(usr[prop_mapping.password], password_hash)) {
 					return Promise.reject(new Error("Incorrect password."));
 				}
 				let type = usr["@type"] || 'none';
 				let jwt_opts = {};
-				if(!(exp === false)) {
+				if (!(exp === false)) {
 					jwt_opts = {
 						expiresIn: exp * 2
 					};
@@ -116,7 +117,7 @@ class Gandalf {
 					token: token
 				};
 				let db_opts = {};
-				if(!(exp === false)) {
+				if (!(exp === false)) {
 					db_opts = {
 						"expiry": exp
 					};
@@ -154,20 +155,20 @@ class Gandalf {
 				return db_auth.get(`session::${decoded.user}::${decoded.origin}`);
 			})
 			.then((res) => {
-				if(!_.isEqual(token, res.value.token)) {
+				if (!_.isEqual(token, res.value.token)) {
 					Promise.reject(new Error('Invalid token.'));
 				}
 				data = res.value;
 				data.last_seen = Date.now();
 				let jwt_opts = {};
-				if(!(exp === false)) {
+				if (!(exp === false)) {
 					jwt_opts = {
 						expiresIn: exp * 2
 					};
 				}
 				data.token = jwt.sign(to_sign, jwt_secret, jwt_opts);
 				let db_opts = {};
-				if(!(exp === false)) {
+				if (!(exp === false)) {
 					db_opts = {
 						"expiry": exp
 					};

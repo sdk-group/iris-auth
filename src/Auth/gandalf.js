@@ -32,7 +32,7 @@ class Gandalf {
 	}
 
 	static check({
-		token: token
+		token
 	}) {
 		return Promise.promisify(jwt.verify)(token, jwt_secret)
 			.then((decoded) => {
@@ -60,12 +60,12 @@ class Gandalf {
 	}
 
 	static authorize({
-		user: user,
-		password_hash: password_hash,
-		origin: origin,
-		expiry: expiry
+		user,
+		password_hash,
+		origin,
+		expiry
 	}) {
-		let exp = expiry || default_expiration;
+		let exp = (expiry == false) ? false : expiry || default_expiration;
 		let get_user = null;
 		if (name_cache[user])
 			get_user = db_main.get(name_cache[user]);
@@ -82,6 +82,9 @@ class Gandalf {
 							needle = value;
 					});
 					return needle;
+				})
+				.catch((err) => {
+					console.log("ERR AUTH", err.stack);
 				});
 		}
 
@@ -114,7 +117,7 @@ class Gandalf {
 					user_id: usr["@id"],
 					user_type: type,
 					p_hash: password_hash,
-					token: token
+					token
 				};
 				let db_opts = {};
 				if (!(exp === false)) {
@@ -140,8 +143,8 @@ class Gandalf {
 			});
 	}
 	static update({
-		token: token,
-		expiry: expiry
+		token,
+		expiry
 	}) {
 		let exp = expiry || default_expiration;
 		let to_sign = {};

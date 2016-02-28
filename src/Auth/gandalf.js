@@ -146,7 +146,7 @@ class Gandalf {
 		token,
 		expiry
 	}) {
-		let exp = expiry || default_expiration;
+		let exp = (expiry == false) ? false : expiry || default_expiration;
 		let to_sign = {};
 		let data = null;
 		return Promise.promisify(jwt.verify)(token, jwt_secret)

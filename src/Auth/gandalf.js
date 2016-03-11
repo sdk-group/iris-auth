@@ -34,8 +34,10 @@ class Gandalf {
 	static check({
 		token
 	}) {
+		// console.log("CHECKING TOKEN", token);
 		return Promise.promisify(jwt.verify)(token, jwt_secret)
 			.then((decoded) => {
+				// console.log("DECODED", decoded);
 				return db_auth.get(`session::${decoded.user}::${decoded.origin}`);
 			})
 			.then((res) => {
@@ -67,6 +69,7 @@ class Gandalf {
 	}) {
 		let exp = (expiry == false) ? false : expiry || default_expiration;
 		let get_user = null;
+		// console.log("AUTH", user, password_hash, origin, expiry, exp);
 		if (name_cache[user])
 			get_user = db_main.get(name_cache[user]);
 		else {
@@ -97,43 +100,56 @@ class Gandalf {
 				if (!_.isEqual(usr[prop_mapping.password], password_hash)) {
 					return Promise.reject(new Error("Incorrect password."));
 				}
-				let type = usr["@type"] || 'none';
-				let jwt_opts = {};
-				if (!(exp === false)) {
-					jwt_opts = {
-						expiresIn: exp * 2
+				return db_auth.get(`session::${user}::${origin}`);
+			})
+			.then((res) => {
+				// console.log("EXISTS", res, user, origin, exp);
+				if (res.value && exp === false) {
+					return {
+						value: true,
+						data: res.value,
+						cas: res.cas,
+						token: res.value.token
 					};
-				}
-				let token = jwt.sign({
-					user: user,
-					origin: origin
-				}, jwt_secret, jwt_opts);
-
-				let data = {
-					login: user,
-					first_seen: Date.now(),
-					last_seen: Date.now(),
-					origin: origin,
-					user_id: usr["@id"],
-					user_type: type,
-					p_hash: password_hash,
-					token
-				};
-				let db_opts = {};
-				if (!(exp === false)) {
-					db_opts = {
-						"expiry": exp
-					};
-				}
-				return db_auth.upsert(`session::${user}::${origin}`, data, db_opts)
-					.then((res) => {
-						return {
-							value: true,
-							token: token,
-							data: data,
-							cas: res.cas
+				} else {
+					let type = usr["@type"] || 'none';
+					let jwt_opts = {};
+					if (!(exp === false)) {
+						jwt_opts = {
+							expiresIn: exp * 2
 						};
-					});
+					}
+					let token = jwt.sign({
+						user: user,
+						origin: origin
+					}, jwt_secret, jwt_opts);
+
+					let data = {
+						login: user,
+						first_seen: Date.now(),
+						last_seen: Date.now(),
+						origin: origin,
+						user_id: usr["@id"],
+						user_type: type,
+						p_hash: password_hash,
+						token
+					};
+					let db_opts = {};
+					if (!(exp === false)) {
+						db_opts = {
+							"expiry": exp
+						};
+					}
+					return db_auth.upsert(`session::${user}::${origin}`, data, db_opts)
+						.then((res) => {
+							return {
+								value: true,
+								token,
+								data,
+								cas: res.cas
+							};
+						});
+				}
 			})
 			.catch((err) => {
 				return {

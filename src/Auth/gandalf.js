@@ -43,19 +43,19 @@ class Gandalf {
 			.then((res) => {
 				if (res.value && _.isEqual(token, res.value.token)) {
 					return {
-						value: true,
-						data: res.value
+						state: true,
+						value: res.value
 					};
 				} else {
 					return {
-						value: false,
+						state: false,
 						reason: 'Invalid token.'
 					};
 				}
 			})
 			.catch((err) => {
 				return {
-					value: false,
+					state: false,
 					reason: err.message
 				};
 			});
@@ -106,10 +106,9 @@ class Gandalf {
 				// console.log("EXISTS", res, user, origin, exp);
 				if (res.value && exp === false) {
 					return {
-						value: true,
-						data: res.value,
-						cas: res.cas,
-						token: res.value.token
+						state: true,
+						value: res.value,
+						cas: res.cas
 					};
 				} else {
 					let type = usr["@type"] || 'none';
@@ -143,9 +142,8 @@ class Gandalf {
 					return db_auth.upsert(`session::${user}::${origin}`, data, db_opts)
 						.then((res) => {
 							return {
-								value: true,
-								token,
-								data,
+								state: true,
+								value: data,
 								cas: res.cas
 							};
 						});
@@ -153,7 +151,7 @@ class Gandalf {
 			})
 			.catch((err) => {
 				return {
-					value: false,
+					state: false,
 					reason: err.message
 				};
 			});
@@ -196,14 +194,14 @@ class Gandalf {
 			})
 			.then((res) => {
 				return {
-					value: true,
+					state: true,
 					token: data.token,
 					cas: res.cas
 				};
 			})
 			.catch((err) => {
 				return {
-					value: false,
+					state: false,
 					reason: err.message
 				};
 			});

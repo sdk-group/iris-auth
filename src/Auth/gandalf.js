@@ -90,17 +90,20 @@ class Gandalf {
 					console.log("ERR AUTH", err.stack);
 				});
 		}
-
+		let usr;
 		return get_user
 			.then((res) => {
 				if (!res) {
 					return Promise.reject(new Error("No such user."));
 				}
-				let usr = res.cas ? res.value : res;
+				usr = res.cas ? res.value : res;
 				if (!_.isEqual(usr[prop_mapping.password], password_hash)) {
 					return Promise.reject(new Error("Incorrect password."));
 				}
-				return db_auth.get(`session::${user}::${origin}`);
+				return db_auth.get(`session::${user}::${origin}`)
+					.catch(err => {
+						return {};
+					});
 			})
 			.then((res) => {
 				// console.log("EXISTS", res, user, origin, exp);
@@ -150,6 +153,7 @@ class Gandalf {
 				}
 			})
 			.catch((err) => {
+				console.log("AUTH ERR", err.stack);
 				return {
 					state: false,
 					reason: err.message

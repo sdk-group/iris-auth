@@ -153,7 +153,7 @@ class Gandalf {
 				}
 			})
 			.catch((err) => {
-				console.log("AUTH ERR", err.stack);
+				// console.log("AUTH ERR", err.stack);
 				return {
 					state: false,
 					reason: err.message

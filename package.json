@@ -30,7 +30,7 @@
   "dependencies": {
     "bluebird": "^3.3.4",
     "jsonwebtoken": "^5.7.0",
-    "lodash": "^4.6.1"
+    "lodash": "^4.8.2"
   },
   "devDependencies": {
     "Couchbird": "git+https://github.com/YuuKohaku/Couchbird.git",

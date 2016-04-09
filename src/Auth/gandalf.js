@@ -2,8 +2,6 @@
 
 let jwt = require("jsonwebtoken");
 let couchbird = require("Couchbird")();
-let N1qlQuery = require("Couchbird")
-	.N1qlQuery;
 
 let db_main = null;
 let db_auth = null;
@@ -73,20 +71,21 @@ class Gandalf {
 		if (name_cache[user])
 			get_user = db_main.get(name_cache[user]);
 		else {
-			let qstr = "SELECT * FROM `" + db_main.bucket_name + "` AS doc WHERE doc.`" + prop_mapping.login + "` IS NOT MISSING;";
-			let query = N1qlQuery.fromString(qstr);
-			get_user = db_main.N1QL(query)
-				.then((res) => {
-					let needle = false;
-					_.map(res, (val) => {
-						let value = val.doc;
-						name_cache[value[prop_mapping.login]] = value['@id'];
-						if (_.isEqual(value[prop_mapping.login], user))
-							needle = value;
-					});
+			get_user = db_main.get('global_membership_description')
+				.then(res => {
+					let keys = _.map(res.value.content, 'member');
+					return db_main.getMulti(keys);
+				})
+				.then(res => {
+					let needle;
+					name_cache = _.reduce(res, (acc, val, key) => {
+						acc[val.value.login] = key;
+						if (val.value.login == user) needle = val;
+						return acc;
+					}, {});
 					return needle;
 				})
-				.catch((err) => {
+				.catch(err => {
 					console.log("ERR AUTH", err.stack);
 				});
 		}

@@ -28,9 +28,9 @@
   },
   "homepage": "https://github.com/sdk-group/iris-auth#readme",
   "dependencies": {
-    "bluebird": "^3.3.4",
+    "bluebird": "^3.3.5",
     "jsonwebtoken": "^5.7.0",
-    "lodash": "^4.9.0"
+    "lodash": "^4.10.0"
   },
   "devDependencies": {
     "Couchbird": "git+https://github.com/YuuKohaku/Couchbird.git",

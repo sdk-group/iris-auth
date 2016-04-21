@@ -7,7 +7,6 @@ let db_main = null;
 let db_auth = null;
 let default_expiration = false;
 let jwt_secret = '667';
-let name_cache = {};
 let prop_mapping = {
 	login: "login",
 	password: "password_hash"
@@ -66,31 +65,15 @@ class Gandalf {
 		expiry
 	}) {
 		let exp = (expiry == false) ? false : expiry || default_expiration;
-		let get_user = null;
-		// console.log("AUTH", user, password_hash, origin, expiry, exp);
-		if (name_cache[user])
-			get_user = db_main.get(name_cache[user]);
-		else {
-			get_user = db_main.get('global_membership_description')
-				.then(res => {
-					let keys = _.map(res.value.content, 'member');
-					return db_main.getMulti(keys);
-				})
-				.then(res => {
-					let needle;
-					name_cache = _.reduce(res, (acc, val, key) => {
-						acc[val.value.login] = key;
-						if (val.value.login == user) needle = val;
-						return acc;
-					}, {});
-					return needle;
-				})
-				.catch(err => {
-					console.log("ERR AUTH", err.stack);
-				});
-		}
 		let usr;
-		return get_user
+		return db_main.get('global_membership_description')
+			.then(res => {
+				let keys = _.map(res.value.content, 'member');
+				return db_main.getMulti(keys);
+			})
+			.then(res => {
+				return _.find(res, (val) => (val.value.login == user));
+			})
 			.then((res) => {
 				if (!res) {
 					return Promise.reject(new Error("No such user."));

@@ -32,6 +32,9 @@ class Gandalf {
 		token
 	}) {
 		// console.log("CHECKING TOKEN", token);
+		db_auth.reconnect();
+		db_main.reconnect();
+
 		return Promise.promisify(jwt.verify)(token, jwt_secret)
 			.then((decoded) => {
 				// console.log("DECODED", decoded);
@@ -64,6 +67,9 @@ class Gandalf {
 		origin,
 		expiry
 	}) {
+		db_auth.reconnect();
+		db_main.reconnect();
+
 		let exp = (expiry == false) ? false : expiry || default_expiration;
 		let usr;
 		return db_main.get('global_membership_description')
@@ -72,6 +78,7 @@ class Gandalf {
 				return db_main.getMulti(keys);
 			})
 			.then(res => {
+				console.log("USERS", res);
 				return _.find(res, (val) => (val.value.login == user));
 			})
 			.then((res) => {

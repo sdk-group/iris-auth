@@ -87,7 +87,7 @@ gulp.task('start-test', function() {
 		script: 'build/run.js',
 		watch: ['build/'],
 		execMap: {
-			"js": "node  --harmony --harmony_proxies"
+			"js": "node  --harmony "
 		},
 		env: {
 			'NODE_ENV': 'development'
@@ -100,7 +100,7 @@ gulp.task('start-serve', function() {
 		script: 'build/index.sample.js',
 		watch: ['build/'],
 		execMap: {
-			"js": "node  --harmony --harmony_proxies"
+			"js": "node  --harmony "
 		},
 		env: {
 			'NODE_ENV': 'development'

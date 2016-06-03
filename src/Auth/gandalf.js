@@ -72,14 +72,23 @@ class Gandalf {
 
 		let exp = (expiry == false) ? false : expiry || default_expiration;
 		let usr;
-		return db_main.get('global_membership_description')
+		let cached = inmemory_cache.get('global_membership_description');
+		return (cached ? Promise.resolve(cached) : db_main.get('global_membership_description')
+				.then(res => res.value.content))
 			.then(res => {
-				let keys = _.map(res.value.content, 'member');
-				return db_main.getMulti(keys);
+				!cached && inmemory_cache.set('global_membership_description', res);
+				let keys = _.map(res, 'member');
+				cached = inmemory_cache.mget(keys);
+				let rest = _.filter(keys, key => _.isUndefined(cached[key]));
+				return db_main.getMulti(rest);
 			})
 			.then(res => {
-				console.log("USERS", res);
-				return _.find(res, (val) => (val.value.login == user));
+				console.log("USERS GOT", res);
+				let r = _.merge(cached, res);
+				_.map(r, (v, k) => {
+					inmemory_cache.set(k, v);
+				});
+				return _.find(r, (val) => (val.value.login == user));
 			})
 			.then((res) => {
 				if (!res) {

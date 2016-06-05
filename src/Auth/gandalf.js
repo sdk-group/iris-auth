@@ -54,6 +54,7 @@ class Gandalf {
 				}
 			})
 			.catch((err) => {
+				global.logger && logger.error(err, "Auth::check error");
 				return {
 					state: false,
 					reason: err.message
@@ -69,7 +70,6 @@ class Gandalf {
 	}) {
 		db_auth.reconnect();
 		db_main.reconnect();
-
 		let exp = (expiry == false) ? false : expiry || default_expiration;
 		let usr;
 		let cached = inmemory_cache.get('global_membership_description');
@@ -79,14 +79,16 @@ class Gandalf {
 				!cached && inmemory_cache.set('global_membership_description', res);
 				let keys = _.map(res, 'member');
 				cached = inmemory_cache.mget(keys);
-				let rest = _.filter(keys, key => _.isUndefined(cached[key]));
+				let rest = _.filter(keys, key => _.isUndefined(cached[key]) || cached[key].error);
+				// console.log("MISSING", rest);
 				return db_main.getMulti(rest);
 			})
 			.then(res => {
-				console.log("USERS GOT", res);
+				// console.log("USERS GOT", res);
 				let r = _.merge(cached, res);
 				_.map(r, (v, k) => {
-					inmemory_cache.set(k, v);
+					if (!v.error)
+						inmemory_cache.set(k, v);
 				});
 				return _.find(r, (val) => (val.value.login == user));
 			})
@@ -152,6 +154,7 @@ class Gandalf {
 			})
 			.catch((err) => {
 				// console.log("AUTH ERR", err.stack);
+				global.logger && logger.error(err, "Auth::authorize error");
 				return {
 					state: false,
 					reason: err.message
@@ -202,6 +205,7 @@ class Gandalf {
 				};
 			})
 			.catch((err) => {
+				global.logger && logger.error(err, "Auth::update error");
 				return {
 					state: false,
 					reason: err.message

@@ -11,7 +11,7 @@ let prop_mapping = {
 	login: "login",
 	password: "password_hash"
 };
-
+let users = {};
 class Gandalf {
 	constructor() {
 		throw new Error("Thou shall not instatiate this.");
@@ -76,27 +76,17 @@ class Gandalf {
 		return (cached ? Promise.resolve(cached) : db_main.get('global_membership_description')
 				.then(res => res.value.content))
 			.then(res => {
-				!cached && inmemory_cache.set('global_membership_description', res);
 				let keys = _.map(res, 'member');
-				cached = inmemory_cache.mget(keys);
-				let rest = _.filter(keys, key => _.isUndefined(cached[key]) || cached[key].error);
 				// console.log("MISSING", rest);
-				return db_main.getMulti(rest);
+				return db_main.getMulti(keys);
 			})
-			.then(res => {
+			.then(users => {
 				// console.log("USERS GOT", res);
-				let r = _.merge(cached, res);
-				_.map(r, (v, k) => {
-					if (!v.error)
-						inmemory_cache.set(k, v);
-				});
-				return _.find(r, (val) => (val.value.login == user));
-			})
-			.then((res) => {
+				let res = _.find(users, (val) => (val.value.login == user || val.login == user));
 				if (!res) {
 					return Promise.reject(new Error("No such user."));
 				}
-				usr = res.cas ? res.value : res;
+				usr = res.value || res;
 				if (!_.isEqual(usr[prop_mapping.password], password_hash)) {
 					return Promise.reject(new Error("Incorrect password."));
 				}

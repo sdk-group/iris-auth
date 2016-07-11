@@ -31,10 +31,7 @@ class Gandalf {
 	static check({
 		token
 	}) {
-		// console.log("CHECKING TOKEN", token);
-		db_auth.reconnect();
-		db_main.reconnect();
-
+		console.log("CHECKING TOKEN", token);
 		return Promise.promisify(jwt.verify)(token, jwt_secret)
 			.then((decoded) => {
 				// console.log("DECODED", decoded);
@@ -55,6 +52,7 @@ class Gandalf {
 			})
 			.catch((err) => {
 				global.logger && logger.error(err, "Auth::check error");
+				console.log("AUTH ERR", err.stack);
 				return {
 					state: false,
 					reason: err.message
@@ -68,8 +66,6 @@ class Gandalf {
 		origin,
 		expiry
 	}) {
-		db_auth.reconnect();
-		db_main.reconnect();
 		let exp = (expiry == false) ? false : expiry || default_expiration;
 		let usr;
 		let cached = inmemory_cache.get('global_membership_description');
@@ -143,7 +139,7 @@ class Gandalf {
 				}
 			})
 			.catch((err) => {
-				// console.log("AUTH ERR", err.stack);
+				console.log("AUTH ERR", err.stack);
 				global.logger && logger.error(err, "Auth::authorize error");
 				return {
 					state: false,

@@ -68,7 +68,7 @@ class Gandalf {
 	}) {
 		let exp = (expiry == false) ? false : expiry || default_expiration;
 		let usr;
-		let cached = inmemory_cache.get('global_membership_description');
+		let cached = false; //inmemory_cache.get('global_membership_description');
 		return (cached ? Promise.resolve(cached) : db_main.get('global_membership_description')
 				.then(res => res.value.content))
 			.then(res => {

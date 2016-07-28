@@ -68,7 +68,7 @@ class Gandalf {
 	}) {
 		let exp = (expiry == false) ? false : expiry || default_expiration;
 		let usr;
-		let cached = false; //inmemory_cache.get('global_membership_description');
+		let cached = false; // inmemory_cache.get('global_membership_description');
 		return (cached ? Promise.resolve(cached) : db_main.get('global_membership_description')
 				.then(res => res.value.content))
 			.then(res => {
@@ -78,7 +78,7 @@ class Gandalf {
 			})
 			.then(users => {
 				// console.log("USERS GOT", res);
-				let res = _.find(users, (val) => (val.value.login == user || val.login == user));
+				let res = _.find(users, (val) => (_.get(val, 'value.login', false) == user || val.login == user));
 				if (!res) {
 					return Promise.reject(new Error("No such user."));
 				}

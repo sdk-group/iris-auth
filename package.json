@@ -33,7 +33,7 @@
 		"lodash": "^4.15.0"
 	},
 	"devDependencies": {
-		"Couchbird": "git+https://github.com/sdk-group/Couchbird.git#get-multi-workers",
+		"Couchbird": "git+https://github.com/sdk-group/Couchbird.git",
 
 		"babel-plugin-transform-remove-console": "^6.8.0",
 		"babel-plugin-transform-strict-mode": "^6.11.3",

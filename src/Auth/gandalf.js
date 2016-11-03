@@ -74,11 +74,11 @@ class Gandalf {
 			.then(res => {
 				let keys = _.map(res, 'member');
 				// console.log("MISSING", rest);
-				return db_main.getMulti(keys);
+				return db_main.getMulti(_.uniq(keys));
 			})
 			.then(users => {
 				// console.log("USERS GOT", res);
-				let res = _.find(users, (val) => (_.get(val, 'value.login', false) == user || val.login == user));
+				let res = _.find(users, (val) => (val.value && val.value.login == user || val.login == user));
 				if (!res) {
 					return Promise.reject(new Error("No such user."));
 				}
